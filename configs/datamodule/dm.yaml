@@ -1,0 +1,3 @@
+_target_: datamodules.datamodule.DataModule
+data_dir: None
+batch_size: 256
