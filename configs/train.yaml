@@ -1,0 +1,7 @@
+defaults:
+  - _self_
+  - datamodule: dm.yaml
+  - model: 
+  - callbacks: default.yaml
+  - logger: null
+  - trainer: 

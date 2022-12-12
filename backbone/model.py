@@ -8,44 +8,22 @@ class Classifier(LightningModule):
         super(Classifier, self).__init__()
         self.model= model
         self.loss= loss
-        self.optimizer= optimizer
-        self.scheduler= scheduler
-        
-        self.train_acc= Accuracy(num_classes= 100)
-        self.val_acc= Accuracy(num_classes= 100)
-        
-        self.train_loss= MeanMetric()
-        self.val_loss= MeanMetric()
-        
-        self.val_acc_best= MaxMetric()
+ 
+        self.metric= Accuracy(num_classes= 100)
         
     def forward(self, x):
         return self.model(x)
-    
-    def on_train_start(self):
-        self.val_acc_best.reset()
         
     def training_step(self, batch, batch_idx):
-        loss, pred, label= self._step(batch)
-        self.train_loss(loss)
-        self.train_acc(pred, label)
-        self.log("train/loss", self.train_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("train/acc", self.train_acc, on_step=False, on_epoch=True, prog_bar=True)
-        return {"loss": loss, "pred": pred, "label": label}
-    
+        return self._step(batch, 'train')
+
     def validation_step(self, batch, batch_idx):
-        loss, pred, label= self._step(batch)
-        self.val_loss(loss)
-        self.val_acc(pred, label)
-        self.log("val/loss", self.val_loss, on_step=False, on_epoch=True, prog_bar=True)
-        self.log("val/acc", self.val_acc, on_step=False, on_epoch=True, prog_bar=True)
-        return {"loss": loss, "pred": pred, "label": label}    
-    
+        return self._step(batch, 'val')
+
     def validation_epoch_end(self, output):
-        acc= self.val_acc.compute()
-        self.val_acc_best(acc)
-        self.log("val/acc_best", self.val_acc_best.compute(), prog_bar=True)
-    
+        x= torch.stack([x for x in output['val/loss']]).mean()
+        self.log('val/best_loss', x, prog_bar= True)
+
     def configure_optimizers(self):
         optimizer= self.hparams.optimizer(params=self.parameters())
         if self.hparams.scheduler is not None:
@@ -61,11 +39,14 @@ class Classifier(LightningModule):
             }
         return {"optimizer": optimizer}
     
-    def _step(self, batch):
+    def _step(self, batch, step):
         image, label= batch
         logits= self(image)
         loss= self.loss(logits, label)
         pred= torch.argmax(logits, dim=1)
-        return loss, pred, label
+        metric= self.metric(pred, label)
+        self.log(f'{step}/acc', metric, prog_bar= True)
+        self.log(f'{step}/loss', loss, prog_bar= True)
+        return loss
     
         

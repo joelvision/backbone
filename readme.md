@@ -1,10 +1,12 @@
-# Target
+# Goal
 
 Implementation of the famous **Backbone** directly and pipeline via **pytorch_lightning and hydra**.
 
-## BackBone
+dataset (https://www.kaggle.com/datasets/mikewallace250/tiny-imagenet-challenge)
+
+## 🦴BackBone
     - Vgg✅
-    - ResNet
+    - ResNet✅
     - ResNext
     - MobilenetV1
     - Densenet
