@@ -49,4 +49,35 @@ class ResnetBottleNeckBlock(nn.Module):
         
         return x
     
+class DenseBottleNeck(nn.Module):
+    def __init__(self, in_c, growth_rate):
+        super(DenseBottleNeck, self).__init__()
+        inner_c= 4 * growth_rate
+        self.residual= nn.Sequential(
+            nn.BatchNorm2d(in_c),
+            nn.ReLU(),
+            nn.Conv2d(inner_c, inner_c, 1, stride=1, padding=0, bias=False),
+            nn.BatchNorm2d(inner_c),
+            nn.ReLU(),
+            nn.Conv2d(inner_c, growth_rate, 3, stride=1, padding=1, bias=False)       
+        )
         
+        self.short_cut= nn.Sequential()
+        
+    def forward(self, x):
+        x= torch.cat([self.short_cut(x) + self.residual(x)], 1)
+        return x
+    
+class Transition(nn.Module):
+    def __init__(self, in_channels, out_channels):
+        super(Transition, self).__init__()
+
+        self.down_sample = nn.Sequential(
+            nn.BatchNorm2d(in_channels),
+            nn.ReLU(),
+            nn.Conv2d(in_channels, out_channels, 1, stride=1, padding=0, bias=False),
+            nn.AvgPool2d(2, stride=2)
+        )
+
+    def forward(self, x):
+        return self.down_sample(x)
