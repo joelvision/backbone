@@ -9,9 +9,9 @@ def autopad(k, p=None):
     return p
 
 class MP(nn.Module):
-    def __init__(self, k=2):
+    def __init__(self, k, s, **args):
         super(MP, self).__init__()
-        self.m= nn.MaxPool2d(kernel_size= k, stride= k)
+        self.m= nn.MaxPool2d(kernel_size= k, stride= k, **args)
         
     def forward(self, x):
         return self.m(x)

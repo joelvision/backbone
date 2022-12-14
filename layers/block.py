@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
 from layers.common import Conv
 
@@ -81,3 +82,30 @@ class Transition(nn.Module):
 
     def forward(self, x):
         return self.down_sample(x)
+    
+
+class ResNextBottleNeck(nn.Module):
+    mul= 2
+    
+    def __init__(self, in_c, group_width, cardinality, s= 1):
+        super(ResNextBottleNeck, self).__init__()
+        self.conv1= Conv(in_c, group_width, 1, s)
+        self.conv2= Conv(group_width, group_width, 3, 1, None, cardinality)
+        self.conv3= Conv(group_width, group_width * self.mul, 1, 1, act=False)
+
+        self.shortcut= nn.Sequential()
+        
+        if s != 1 or in_c != group_width * self.mul:
+            self.shortcut= nn.Sequential(
+                Conv(in_c, group_width * self.mul, 1, s, act=False)
+            )
+    
+    def forward(self, x):
+        x= self.conv1(x)
+        x= self.conv2(x)
+        x= self.conv3(x)
+        x+= self.shortcut(x)
+        x= F.relu(x)
+        
+        return x
+    
