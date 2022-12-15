@@ -108,4 +108,20 @@ class ResNextBottleNeck(nn.Module):
         x= F.relu(x)
         
         return x
-    
+
+class Depthwise(nn.Module):
+    def __init__(self, in_c, out_c, s=1):
+        super(Depthwise, self).__init__()
+        self.depthwise= nn.Sequential(
+            Conv(in_c, in_c, 3, s, None, in_c)
+        )
+        
+        self.pointwise= nn.Sequential(
+            Conv(in_c, out_c, 1, 1, 0)
+        )
+        
+    def forward(self, x):
+        x= self.depthwise(x)
+        x= self.pointwise(x)
+        
+        return x
