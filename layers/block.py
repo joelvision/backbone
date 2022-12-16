@@ -110,7 +110,7 @@ class ResNextBottleNeck(nn.Module):
         return x
 
 class Depthwise(nn.Module):
-    def __init__(self, in_c, out_c, s=1):
+    def __init__(self, in_c, out_c, s=1, is_seblock= False):
         super(Depthwise, self).__init__()
         self.depthwise= nn.Sequential(
             Conv(in_c, in_c, 3, s, None, in_c)
@@ -120,8 +120,33 @@ class Depthwise(nn.Module):
             Conv(in_c, out_c, 1, 1, 0)
         )
         
+        if is_seblock:
+            self.seblock= SEblock(out_c)
+        else:
+            self.seblock= nn.Identity()
+            
     def forward(self, x):
         x= self.depthwise(x)
         x= self.pointwise(x)
-        
+        x= self.seblock(x)
         return x
+    
+class SEblock(nn.Module):
+    def __init__(self, in_c, r= 16):
+        super(SEblock, self).__init__()
+        self.squeeze= nn.AdaptiveAvgPool2d((1, 1))
+        self.excitation= nn.Sequential(
+            nn.Linear(in_c, in_c // r),
+            nn.ReLU(),
+            nn.Linear(in_c //r, in_c),
+            nn.Sigmoid()
+        )
+        
+    def forward(self, x):
+        x= self.squeeze(x)
+        x= x.view(x.size(0), -1)
+        x= self.excitation(x)
+        x= x.view(x.size(0), x.size(1), 1, 1)
+
+        return x
+    

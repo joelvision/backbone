@@ -1,3 +1,5 @@
+import sys
+sys.path.append("")
 import torch
 import torch.nn as nn
 
@@ -5,8 +7,8 @@ from layers.block import Depthwise
 from layers.common import Conv
 
 # MobileNetV1
-class MobileNet(nn.Module):
-    def __init__(self, width_multiplier, num_classes, is_seblock= False, init_weights=True):
+class SEMobileNet(nn.Module):
+    def __init__(self, width_multiplier, num_classes, is_seblock= True, init_weights=True):
         super().__init__()
         self.init_weights=init_weights
         alpha = width_multiplier
@@ -75,13 +77,13 @@ class MobileNet(nn.Module):
                 nn.init.normal_(m.weight, 0, 0.01)
                 nn.init.constant_(m.bias, 0)
 
-def mobilenet(alpha=1, num_classes=10):
-    return MobileNet(alpha, num_classes)
+def semobilenet(alpha=1, num_classes=10):
+    return SEMobileNet(alpha, num_classes)
 
 
 
 if __name__ == '__main__':
-    model= mobilenet()
-    x= torch.randn((1, 3, 224, 224))
+    model= semobilenet()
+    x= torch.randn((3, 3, 224, 224))
     output= model(x)
     print(output.size())
