@@ -1,7 +1,15 @@
 defaults:
   - _self_
-  - datamodule: dm.yaml
-  - model: 
+  - datamodule: datamodule.yaml
+  - model: model.yaml
   - callbacks: default.yaml
-  - logger: null
-  - trainer: 
+  - logger: tensorboard.yaml
+  - trainer: default.yaml
+  - paths: default.yaml
+  - hydra: default.yaml
+
+task_name: "train"
+train: true
+test: true
+ckpt_path: null
+seed: 42

@@ -1,8 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-
-from layers.common import Conv
+from layers.common import Conv, ConvBnAct
 
 class ResnetBlock(nn.Module):
     expansion=1
@@ -110,7 +109,26 @@ class ResNextBottleNeck(nn.Module):
         return x
 
 class Depthwise(nn.Module):
-    def __init__(self, in_c, out_c, s=1, is_seblock= False):
+    def __init__(self, in_c, out_c, k=1, s=1, p=None, g=1, act=True):
+        super(Depthwise, self).__init__()
+        self.depth= nn.Sequential(
+            Conv(in_c, in_c, k, s, p, g, act)
+        )
+        
+    def forward(self, x):
+        return self.depth(x)
+
+class Pointwise(nn.Module):
+    def __init__(self, in_c, out_c, k=1, s=1, p=None, g=1, act=True):
+        self.pointwise= nn.Sequential(
+            Conv(in_c, out_c, k, s, p, g, act)
+        )
+    
+    def forward(self, x):
+        return self.pointwise(x)
+    
+class Depthwise(nn.Module):
+    def __init__(self, in_c, out_c, k=1, s=1, p=None, g=1, act=True, is_seblock=True):
         super(Depthwise, self).__init__()
         self.depthwise= nn.Sequential(
             Conv(in_c, in_c, 3, s, None, in_c)
@@ -150,3 +168,7 @@ class SEblock(nn.Module):
 
         return x
     
+class MbConv(nn.Module):
+    def __init__(self, in_c, out_c, k=1, se_scale=4, p=0.5):
+        super(MbConv, self)._init__()
+        self.p= torch.tensor(p) if (in_c == out_c) else torch.tensor(1).float()

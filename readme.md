@@ -10,9 +10,9 @@ dataset (https://www.kaggle.com/datasets/mikewallace250/tiny-imagenet-challenge)
     - ResNext✅
     - MobilenetV1✅
     - Densenet✅
-    - ShuffleNet
-    - NasNet
-    - SENet
-    - Regnet
+    - SENet✅
     - Efficientnet
+    - Regnet
+    - MLP-Mixer
+
 

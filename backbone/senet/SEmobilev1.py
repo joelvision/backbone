@@ -6,7 +6,6 @@ import torch.nn as nn
 from layers.block import Depthwise
 from layers.common import Conv
 
-# MobileNetV1
 class SEMobileNet(nn.Module):
     def __init__(self, width_multiplier, num_classes, is_seblock= True, init_weights=True):
         super().__init__()

@@ -1,5 +1,8 @@
+import sys
+sys.path.append("")
 import torch
 import torch.nn as nn
+from classification.layers.activation import Swish
 
 def autopad(k, p=None):
     # pad to same
@@ -30,3 +33,5 @@ class Conv(nn.Module):
         x= self.act(x)
         
         return x
+    
+
