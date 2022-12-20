@@ -168,6 +168,31 @@ class SEblock(nn.Module):
 
         return x
     
+class InvertedResidual(nn.Module):
+    def __init__(self, in_c, out_c, s, expand_ratio):
+        super(InvertedResidual, self).__init__()
+        self.stride= s
+        hidden_dim= int(in_c * expand_ratio)
+        self.use_res_connect= self.s == 1 and in_c == out_c
+        
+        if expand_ratio == 1:
+            self.conv= nn.Sequential(
+                Conv(hidden_dim, hidden_dim, 3, s, None, g= hidden_dim),
+                Conv(hidden_dim, out_c, 1, 1, 0, act= False)
+                )
+        else:
+            self.conv= nn.Sequential(
+                Conv(in_c, hidden_dim, 1, 1, 0),
+                Conv(hidden_dim, hidden_dim, 3, s, None, hidden_dim),
+                Conv(hidden_dim, out_c, 1, 1, 0, act=False)
+            )
+    
+    def forward(self, x):
+        if self.use_res_connect:
+            return x + self.conv(x)
+        else:
+            return self.conv(x)
+            
 class MbConv(nn.Module):
     def __init__(self, in_c, out_c, k=1, se_scale=4, p=0.5):
         super(MbConv, self)._init__()
